@@ -39,7 +39,7 @@ public class AccountService {
 
     @Transactional
     public Account withdraw(Long cbu, Double sum) {
-        Account account = accountRepository.findAccountByCbu(cbu);
+        Account account = accountRepository.findAllByCbu(cbu);
 
         if (account.getBalance() < sum) {
             throw new InsufficientFundsException("Insufficient funds");
@@ -57,12 +57,22 @@ public class AccountService {
         if (sum <= 0) {
             throw new DepositNegativeSumException("Cannot deposit negative sums");
         }
-
-        Account account = accountRepository.findAccountByCbu(cbu);
-        account.setBalance(account.getBalance() + sum);
+        Account account = accountRepository.findAllByCbu(cbu);
+        account.setBalance(account.getBalance() + applyPromo(sum));
         accountRepository.save(account);
 
         return account;
+    }
+
+    public Double applyPromo(Double amount){
+        if (amount >= 2000){
+            Double promo = amount * 0.1;
+            if (promo > 500){
+                promo = 500.00;
+            }
+            amount += promo;
+        }
+        return amount;
     }
 
 }
